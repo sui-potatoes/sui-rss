@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "functions": {
+        "src/api/channel.ts": {
+            "runtime": "nodejs18.x"
+        },
+        "src/api/hello.ts": {
+            "runtime": "nodejs18.x"
+        }
+    },
+    "routes": [
+        {
+            "src": "^/channel\\.xml$",
+            "dest": "src/api/channel.ts"
+        },
+        {
+            "src": "^/api/.*",
+            "dest": "src/api/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html",
+            "status": 200
+        }
+    ]
+}
