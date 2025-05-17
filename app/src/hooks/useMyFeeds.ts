@@ -18,6 +18,7 @@ const RSS = bcs.struct("RSS", {
     name: bcs.String,
     cap_id: bcs.Address,
     is_public: bcs.Bool,
+    publishers: bcs.vector(bcs.Address),
     suins_id: bcs.Address,
     last_updated_ms: bcs.u64(),
     metadata: bcs.vector(
@@ -40,7 +41,7 @@ export function useMyFeeds() {
         {
             owner: currentAccount?.address || "",
             filter: {
-                StructType: `${packageId}::sui_rss::RSSAdminCap`,
+                StructType: `${packageId}::rss::RSSAdminCap`,
             },
             options: { showBcs: true },
         },

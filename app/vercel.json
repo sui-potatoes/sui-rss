@@ -1,26 +1,24 @@
 {
     "version": 2,
+    "buildCommand": "pnpm build",
+    "outputDirectory": "dist",
     "functions": {
-        "src/api/channel.ts": {
-            "runtime": "@vercel/node@18"
-        },
-        "src/api/hello.ts": {
-            "runtime": "@vercel/node@18"
+        "api/rss.ts": {
+            "runtime": "@vercel/node@5.1.16"
         }
     },
     "routes": [
         {
-            "src": "^/channel\\.xml$",
-            "dest": "src/api/channel.ts"
+            "src": "/(.*)\\.xml(\\?.*)?$",
+            "dest": "/api/rss.ts"
         },
         {
-            "src": "^/api/.*",
-            "dest": "src/api/$1"
+            "src": "/assets/(.*)",
+            "dest": "/assets/$1"
         },
         {
             "src": "/(.*)",
-            "dest": "/index.html",
-            "status": 200
+            "dest": "/index.html"
         }
     ]
 }

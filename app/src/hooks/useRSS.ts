@@ -10,6 +10,7 @@ const RSS = bcs.struct("RSS", {
     name: bcs.String,
     cap_id: bcs.Address,
     is_public: bcs.Bool,
+    publishers: bcs.vector(bcs.Address),
     suins_id: bcs.Address,
     last_updated_ms: bcs.u64(),
     metadata: bcs.vector(

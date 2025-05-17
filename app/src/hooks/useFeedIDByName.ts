@@ -17,11 +17,12 @@ export default function useFeedIDByName({ name }: { name?: string }) {
             select(data) {
                 if (!data.data) throw new Error("No data");
                 if (!data.data.content) throw new Error("No content");
-                if (data.data.content.dataType !== "moveObject") throw new Error("Not a move object");
+                if (data.data.content.dataType !== "moveObject")
+                    throw new Error("Not a move object");
 
                 // @ts-ignore
                 return data.data.content.fields.value;
-            }
+            },
         },
     );
 }

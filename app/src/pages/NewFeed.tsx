@@ -140,7 +140,7 @@ export default function NewFeed() {
 
         const tx = new Transaction();
         let [rss, cap] = tx.moveCall({
-            target: `${packageId}::sui_rss::new_rss`,
+            target: `${packageId}::rss::new_rss`,
             arguments: [tx.object(registryId), tx.objectRef(suinsName), tx.object.clock()],
         });
 
@@ -150,12 +150,12 @@ export default function NewFeed() {
             .serialize([title, link, description].map((s) => s.trim()));
 
         tx.moveCall({
-            target: `${packageId}::sui_rss::set_metadata`,
+            target: `${packageId}::rss::set_metadata`,
             arguments: [rss, cap, tx.pure(keys), tx.pure(values), tx.object.clock()],
         });
 
         tx.moveCall({
-            target: `${packageId}::sui_rss::share_rss`,
+            target: `${packageId}::rss::share_rss`,
             arguments: [rss],
         });
 

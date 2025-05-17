@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 /// Module: rss
-module rss::sui_rss;
+///
+/// TODOs:
+/// - `is_public` cannot be changed.
+module rss::rss;
 
 use std::string::String;
 use sui::{
     clock::Clock,
+    package,
     table::{Self, Table},
     table_vec::{Self, TableVec},
     vec_map::{Self, VecMap},
@@ -30,6 +34,9 @@ const ENameDoesNotExist: u64 = 5;
 const EAlreadyOwned: u64 = 6;
 /// Trying to publish to a feed without the proper cap.
 const ENotPublisher: u64 = 7;
+
+/// OTW for the RSS package.
+public struct RSS has drop {}
 
 /// RSS is a key object to register RSS feeds. Each feed is a separate RSS object
 /// discoverable via the RSSRegistry.
@@ -63,7 +70,7 @@ public struct Authorization(ID, ID, bool, VecSet<ID>)
 public struct RSSItem(VecMap<String, String>) has drop, store;
 
 /// A single RSS feed. A shared object, discoverable via the `RSSRegistry`.
-public struct RSS has key {
+public struct RSSFeed has key {
     id: UID,
     /// The name of the SuiNS registration that the RSS feed is associated with.
     name: String,
@@ -92,7 +99,7 @@ public fun new_rss(
     name: &SuinsRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
-): (RSS, RSSAdminCap) {
+): (RSSFeed, RSSAdminCap) {
     assert!(!name.has_expired(clock), ENameExpired);
     assert!(!reg.feeds.contains(name.domain_name()), ENameExists);
 
@@ -101,7 +108,7 @@ public fun new_rss(
     let domain_name = name.domain_name();
     reg.feeds.add(domain_name, id.to_inner());
 
-    let rss = RSS {
+    let rss = RSSFeed {
         id,
         name: domain_name,
         cap_id: cap.id.to_inner(),
@@ -119,7 +126,7 @@ public fun new_rss(
 /// Overrides metadata in place.
 /// Two fields cannot be passed: `name` and `timestamp`.
 public fun set_metadata(
-    rss: &mut RSS,
+    rss: &mut RSSFeed,
     cap: &RSSAdminCap,
     fields: vector<String>,
     values: vector<String>,
@@ -143,7 +150,7 @@ public fun set_metadata(
 
 /// Create a new publisher cap for the RSS feed.
 /// It can then be transferred or used in an application.
-public fun new_publisher(rss: &mut RSS, cap: &RSSAdminCap, ctx: &mut TxContext): RSSPublishCap {
+public fun new_publisher(rss: &mut RSSFeed, cap: &RSSAdminCap, ctx: &mut TxContext): RSSPublishCap {
     assert!(rss.id.to_inner() == cap.rss_id, ENotAdmin);
     assert!(rss.cap_id == cap.id.to_inner(), EInvalidCap);
 
@@ -154,7 +161,7 @@ public fun new_publisher(rss: &mut RSS, cap: &RSSAdminCap, ctx: &mut TxContext):
 
 /// Revoke a publisher from the RSS feed, can only be done by the admin.
 public fun revoke_publisher(
-    rss: &mut RSS,
+    rss: &mut RSSFeed,
     cap: &RSSAdminCap,
     publisher_id: ID,
     _ctx: &mut TxContext,
@@ -168,7 +175,7 @@ public fun revoke_publisher(
 }
 
 /// Return the capability and remove the publisher from the RSS feed.
-public fun give_up_publisher(rss: &mut RSS, cap: RSSPublishCap) {
+public fun give_up_publisher(rss: &mut RSSFeed, cap: RSSPublishCap) {
     let RSSPublishCap { id, rss_id } = cap;
 
     assert!(rss.id.to_inner() == rss_id, ENotPublisher);
@@ -183,7 +190,7 @@ public fun give_up_publisher(rss: &mut RSS, cap: RSSPublishCap) {
 /// Add an item to the RSS feed. Creates a Potato Authorization request. If
 /// public - can be destroyed right away. If not - need to show the RSSAdminCap.
 public fun add_item(
-    rss: &mut RSS,
+    rss: &mut RSSFeed,
     fields: vector<String>,
     values: vector<String>,
     clock: &Clock,
@@ -234,7 +241,7 @@ public fun confirm_publisher(auth: Authorization, cap: &RSSPublishCap) {
 /// Take over the RSS feed from the previous owner by showing the new valid SuinsRegistration.
 public fun take_over(
     reg: &mut RSSRegistry,
-    rss: &mut RSS,
+    rss: &mut RSSFeed,
     suins: &SuinsRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
@@ -252,7 +259,7 @@ public fun take_over(
 }
 
 /// Share the RSS object after making changes.
-public fun share_rss(rss: RSS) { transfer::share_object(rss) }
+public fun share_rss(rss: RSSFeed) { transfer::share_object(rss) }
 
 #[allow(unused_function)]
 /// To be called in a dry run.
@@ -260,7 +267,7 @@ public fun share_rss(rss: RSS) { transfer::share_object(rss) }
 /// Records are stored as a vector, we take the last `limit` items, offsetting them
 /// by `offset`. So offset=0 means the last `limit` items, offset=1 means the last
 /// `limit` items excluding the first one, etc.
-fun print_rss(rss: &RSS, limit: u64, offset: u64, clock: &Clock): String {
+fun print_rss(rss: &RSSFeed, limit: u64, offset: u64, clock: &Clock): String {
     let length = rss.items.length();
     let start_idx = if (length >= limit + offset) length - limit - offset else 0;
 
@@ -305,7 +312,8 @@ fun print_xml(name: String, value: String): String {
 }
 
 /// Initialize the RSS registry once.
-fun init(ctx: &mut TxContext) {
+fun init(otw: RSS, ctx: &mut TxContext) {
+    package::claim_and_keep(otw, ctx);
     transfer::share_object(RSSRegistry {
         id: object::new(ctx),
         feeds: table::new(ctx),

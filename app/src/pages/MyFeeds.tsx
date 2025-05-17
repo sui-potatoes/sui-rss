@@ -25,7 +25,12 @@ export default function MyFeeds() {
         <div>
             <p>
                 <a href="/my-feeds">my feeds</a>
-                {name && `: ${name}`}
+                {name && (
+                    <>
+                        {" / "}
+                        <span className="underline">{name}</span>
+                    </>
+                )}
             </p>
             {!feed && (
                 <div className="mt-10">
@@ -37,7 +42,10 @@ export default function MyFeeds() {
                             return (
                                 <div key={feed.data?.cap.objectId}>
                                     <p>
-                                        - <a href={`/my-feeds/${name}`}>{name}</a>
+                                        -{" "}
+                                        <a href={`/my-feeds/${name}`} className="text-blue-500">
+                                            {name}
+                                        </a>
                                     </p>
                                 </div>
                             );
@@ -68,18 +76,50 @@ export default function MyFeeds() {
                                 },
                             ])
                             .map(({ key, value }) => {
+                                if (key === "link") {
+                                    return (
+                                        <p key={key}>
+                                            - {key}:{" "}
+                                            <a href={value} className="text-blue-500">
+                                                {value}
+                                            </a>
+                                        </p>
+                                    );
+                                }
+
                                 return (
                                     <p key={key}>
-                                        {key}: {value}
+                                        - {key}: {value}
                                     </p>
                                 );
                             })}
-                        <p>
-                            preview: <a href={`/rss/${name}`}>{`/rss/${name}.xml`}</a>
+                        <p className="mt-10">
+                            - feed URL:{" "}
+                            <a href={`/${name}.xml`} className="text-blue-500">
+                                {`/${name}.xml`}
+                            </a>{" "}
+                            <a
+                                onClick={(e) => {
+                                    navigator.clipboard.writeText(
+                                        `${window.location.origin}/${name}.xml`,
+                                    );
+                                    (e.target as HTMLAnchorElement).innerHTML = "(copied)";
+                                    setTimeout(
+                                        () =>
+                                            ((e.target as HTMLAnchorElement).innerHTML = "(copy)"),
+                                        1000,
+                                    );
+                                }}
+                            >
+                                (copy)
+                            </a>
                         </p>
-                        <button className="mt-10" onClick={() => setModalOpen(true)}>
-                            new item
-                        </button>
+                        <p className="mt-1">
+                            -{" "}
+                            <button onClick={() => setModalOpen(true)} className="text-blue-500">
+                                post new item
+                            </button>
+                        </p>
                         <Modal show={modalOpen} onClose={() => setModalOpen(false)}>
                             <div
                                 className="gap-2 flex flex-col"
@@ -157,7 +197,7 @@ export default function MyFeeds() {
             .serialize([title, link, description].map((s) => s.trim()));
 
         const auth = tx.moveCall({
-            target: `${packageId}::sui_rss::add_item`,
+            target: `${packageId}::rss::add_item`,
             arguments: [
                 tx.sharedObjectRef({
                     objectId: feed.data.rss.objectId,
@@ -171,7 +211,7 @@ export default function MyFeeds() {
         });
 
         tx.moveCall({
-            target: `${packageId}::sui_rss::confirm_admin`,
+            target: `${packageId}::rss::confirm_admin`,
             arguments: [auth, tx.objectRef(feed.data.cap)],
         });
 
