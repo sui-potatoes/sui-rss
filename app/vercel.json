@@ -2,10 +2,10 @@
     "version": 2,
     "functions": {
         "src/api/channel.ts": {
-            "runtime": "nodejs18.x"
+            "runtime": "@vercel/node@18"
         },
         "src/api/hello.ts": {
-            "runtime": "nodejs18.x"
+            "runtime": "@vercel/node@18"
         }
     },
     "routes": [

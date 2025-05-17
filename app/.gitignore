@@ -13,3 +13,4 @@ dist
 
 # other
 .DS_Store
+.vercel
