@@ -18,6 +18,7 @@ export default function MyFeeds() {
     const [link, setLink] = useState("");
     const [description, setDescription] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
+    const [mode, setMode] = useState<"feed" | "post">("post");
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const feed = (name && feeds.find((feed) => feed.data?.rss.rss.name === `${name}.sui`)) || null;
 
@@ -94,6 +95,33 @@ export default function MyFeeds() {
                                 );
                             })}
                         <p className="mt-10">
+                            -{" "}
+                            <a
+                                onClick={() => {
+                                    setMode("feed");
+                                    setModalOpen(true);
+                                    const { title, link, description } =
+                                        feed.data!.rss.rss.metadata.reduce(
+                                            (acc, v) => {
+                                                if (v.key === "title") acc.title = v.value;
+                                                if (v.key === "link") acc.link = v.value;
+                                                if (v.key === "description")
+                                                    acc.description = v.value;
+                                                return acc;
+                                            },
+                                            { title: "", link: "", description: "" },
+                                        );
+
+                                    setTitle(title);
+                                    setLink(link);
+                                    setDescription(description);
+                                }}
+                                className="text-blue-500"
+                            >
+                                edit feed
+                            </a>
+                        </p>
+                        <p className="mt-1">
                             - feed URL:{" "}
                             <a href={`/${name}.xml`} className="text-blue-500">
                                 {`/${name}.xml`}
@@ -116,7 +144,13 @@ export default function MyFeeds() {
                         </p>
                         <p className="mt-1">
                             -{" "}
-                            <button onClick={() => setModalOpen(true)} className="text-blue-500">
+                            <button
+                                onClick={() => {
+                                    setMode("post");
+                                    setModalOpen(true);
+                                }}
+                                className="text-blue-500"
+                            >
                                 post new item
                             </button>
                         </p>
@@ -164,9 +198,17 @@ export default function MyFeeds() {
                                 <button
                                     className="mt-10"
                                     onClick={() => {
-                                        addItem({ title, link, description }).then(() =>
-                                            setModalOpen(false),
-                                        );
+                                        if (mode === "post") {
+                                            addItem({ title, link, description }).then(() =>
+                                                setModalOpen(false),
+                                            );
+                                        }
+
+                                        if (mode === "feed") {
+                                            editFeed({ title, link, description }).then(() =>
+                                                setModalOpen(false),
+                                            );
+                                        }
                                     }}
                                 >
                                     publish
@@ -178,6 +220,46 @@ export default function MyFeeds() {
             )}
         </div>
     );
+
+    async function editFeed({
+        title,
+        link,
+        description,
+    }: {
+        title: string;
+        link: string;
+        description: string;
+    }) {
+        if (!feed || !feed.data) return;
+
+        const tx = new Transaction();
+        const keys = bcs.vector(bcs.string()).serialize(["title", "link", "description"]);
+        const values = bcs
+            .vector(bcs.string())
+            .serialize([title, link, description].map((s) => s.trim()));
+
+        tx.moveCall({
+            target: `${packageId}::rss::set_metadata`,
+            arguments: [
+                tx.sharedObjectRef({
+                    objectId: feed.data.rss.objectId,
+                    initialSharedVersion: feed.data.rss.initialSharedVersion,
+                    mutable: true,
+                }),
+                tx.objectRef(feed.data.cap),
+                tx.pure(keys),
+                tx.pure(values),
+                tx.object.clock(),
+            ],
+        });
+
+        // @ts-ignore
+        const result = await signAndExecuteTransaction({ transaction: tx });
+
+        console.log(result);
+
+        return result;
+    }
 
     async function addItem({
         title,

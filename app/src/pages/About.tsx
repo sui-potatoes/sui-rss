@@ -47,6 +47,15 @@ export default function About() {
                 <a href="https://github.com/sui-potatoes" target="_blank" className="text-blue-500">
                     Sui Potatoes
                 </a>
+                . Source code is available on{" "}
+                <a
+                    href="https://github.com/sui-potatoes/sui-rss"
+                    target="_blank"
+                    className="text-blue-500"
+                >
+                    GitHub
+                </a>
+                .
             </p>
         </div>
     );
