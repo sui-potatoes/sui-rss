@@ -3,14 +3,8 @@
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../networkConfig";
-import { bcs } from "@mysten/sui/bcs";
 import { fromBase64 } from "@mysten/bcs";
-
-const RSSRegistry = bcs.struct("RSSRegistry", {
-    id: bcs.Address,
-    feeds_id: bcs.Address,
-    num_feeds: bcs.u64(),
-});
+import { bcs } from "../bcs";
 
 export default function useRSSRegistry() {
     const registryId = useNetworkVariable("registryId");
@@ -32,7 +26,7 @@ export default function useRSSRegistry() {
                 // @ts-ignore
                 if (!("Shared" in data.data.owner)) throw new Error("Not shared");
 
-                const registry = RSSRegistry.parse(fromBase64(data.data.bcs.bcsBytes));
+                const registry = bcs.RSSRegistry.parse(fromBase64(data.data.bcs.bcsBytes));
 
                 return {
                     registry,

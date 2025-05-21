@@ -3,8 +3,7 @@ name = "rss"
 edition = "2024.beta"
 
 [dependencies]
-# Sui = { override = true, git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.48.0-release" }
-suins = { r.mvr = "@suins/core" }
+suins = { local = "../../suins" }
 
 [addresses]
 rss = "0x0"

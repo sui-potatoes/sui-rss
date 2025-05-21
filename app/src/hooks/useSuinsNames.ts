@@ -3,19 +3,12 @@
 
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../networkConfig";
-import { bcs } from "@mysten/sui/bcs";
 import { fromBase64 } from "@mysten/bcs";
 import { SuiObjectRef } from "@mysten/sui/client";
+import { bcs } from "../bcs";
 
-const SuinsRegistration = bcs.struct("SuinsRegistration", {
-    id: bcs.Address,
-    domain: bcs.vector(bcs.String),
-    domain_name: bcs.String,
-    expiration_timestamp_ms: bcs.u64(),
-    image_url: bcs.String,
-});
-
-export type SuinsRegistration = typeof SuinsRegistration.$inferType;
+/** Type shorthand for the BCS definition */
+export type SuinsRegistration = typeof bcs.SuinsRegistration.$inferType;
 
 export function useSuinsNames() {
     const currentAccount = useCurrentAccount();
@@ -33,19 +26,19 @@ export function useSuinsNames() {
             enabled: !!currentAccount?.address,
             select(data) {
                 return data.data?.map((obj) => {
-                    const bcs = obj.data?.bcs;
+                    const bytes = obj.data?.bcs;
 
                     // hello typescript
                     if (!obj.data) throw new Error("No data");
-                    if (!bcs) throw new Error("No bcs");
-                    if (bcs.dataType !== "moveObject") throw new Error("Not a move object");
+                    if (!bytes) throw new Error("No bcs");
+                    if (bytes.dataType !== "moveObject") throw new Error("Not a move object");
 
                     return {
-                        suins: SuinsRegistration.parse(fromBase64(bcs.bcsBytes)),
+                        suins: bcs.SuinsRegistration.parse(fromBase64(bytes.bcsBytes)),
                         objectId: obj.data.objectId,
                         digest: obj.data.digest,
                         version: obj.data.version,
-                    } as SuiObjectRef & { suins: typeof SuinsRegistration.$inferType };
+                    } as SuiObjectRef & { suins: SuinsRegistration };
                 });
             },
         },

@@ -5,34 +5,15 @@ import { useCurrentAccount, useSuiClientQueries } from "@mysten/dapp-kit";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../networkConfig";
 import { fromBase64 } from "@mysten/bcs";
-import { bcs } from "@mysten/sui/bcs";
 import { SuiObjectRef } from "@mysten/sui/client";
+import { bcs } from "../bcs";
 
-const RSSAdminCap = bcs.struct("RSSAdminCap", {
-    id: bcs.Address,
-    rss_id: bcs.Address,
-});
+/** Type shorthand for the `sui_rss::rss::RSSAdminCap` type. */
+export type RSSAdminCap = typeof bcs.RSSAdminCap.$inferType;
 
-const RSS = bcs.struct("RSS", {
-    id: bcs.Address,
-    name: bcs.String,
-    cap_id: bcs.Address,
-    is_public: bcs.Bool,
-    publishers: bcs.vector(bcs.Address),
-    suins_id: bcs.Address,
-    last_updated_ms: bcs.u64(),
-    metadata: bcs.vector(
-        bcs.struct("Entry", {
-            key: bcs.String,
-            value: bcs.String,
-        }),
-    ),
-    items: bcs.struct("TableVec", {
-        id: bcs.Address,
-        size: bcs.u64(),
-    }),
-});
-
+/**
+ * Get the RSS feeds that the current account has admin access to.
+ */
 export function useMyFeeds() {
     const currentAccount = useCurrentAccount();
     const packageId = useNetworkVariable("packageId");
@@ -54,11 +35,11 @@ export function useMyFeeds() {
                         throw new Error("Not a move object");
 
                     return {
-                        cap: RSSAdminCap.parse(fromBase64(obj.data.bcs.bcsBytes)),
+                        cap: bcs.RSSAdminCap.parse(fromBase64(obj.data.bcs.bcsBytes)),
                         objectId: obj.data.objectId,
                         digest: obj.data.digest,
                         version: obj.data.version,
-                    } as SuiObjectRef & { cap: typeof RSSAdminCap.$inferType };
+                    } as SuiObjectRef & { cap: RSSAdminCap };
                 });
             },
         },
@@ -85,7 +66,7 @@ export function useMyFeeds() {
                         return {
                             cap,
                             rss: {
-                                rss: RSS.parse(fromBase64(data.data.bcs.bcsBytes)),
+                                rss: bcs.RSS.parse(fromBase64(data.data.bcs.bcsBytes)),
                                 objectId: data.data.objectId,
                                 initialSharedVersion: owner.Shared.initial_shared_version,
                             },

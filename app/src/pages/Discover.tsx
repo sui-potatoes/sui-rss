@@ -46,8 +46,8 @@ export default function Discover() {
                     </p>
                 );
             })}
-            {fields?.hasNextPage && <a href={`/discover/${fields.nextCursor}`}>next</a>}
             {page && <a onClick={() => window.history.back()}>prev</a>}
+            {fields?.hasNextPage && <a className="ml-2" href={`/discover/${fields.nextCursor}`}>next</a>}
         </div>
     );
 }

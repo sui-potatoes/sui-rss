@@ -82,7 +82,7 @@ public struct RSSFeed has key {
     is_public: bool,
     /// The IDs of the publishers that are allowed to publish to this RSS feed.
     publishers: VecSet<ID>,
-    /// The ID of the Suiins registration that the RSS feed is associated with.
+    /// The ID of the `SuinsRegistration` that the RSS feed is associated with.
     suins_id: ID,
     /// The last time the RSS feed was updated.
     last_updated_ms: u64,
