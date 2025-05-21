@@ -3,7 +3,7 @@ name = "rss"
 edition = "2024.beta"
 
 [dependencies]
-suins = { local = "../../suins" }
+suins = { r.mvr = "@suins/core" }
 
 [addresses]
 rss = "0x0"
