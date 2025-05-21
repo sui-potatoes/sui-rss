@@ -1,20 +1,20 @@
 # Sui RSS
 
-Sui [RSS feeds](https://en.wikipedia.org/wiki/RSS) implementation: decentralized publishing platform written in Move and published on Sui network.
+Sui [RSS feeds](https://en.wikipedia.org/wiki/RSS) implementation: decentralized publishing platform written in Move and published on [Sui network](https://sui.io/).
 
-- Try it live on https://suirss.com/
-- Or subscribe to our RSS: https://suirss.com/rss.xml
+-   Try it live on https://suirss.com/
+-   Or subscribe to our RSS: https://suirss.com/rss.xml
 
 ## Features
 
-- creating a new RSS feed with a top-level [SuiNS name](https://suins.io/);
-- publishing to the feed;
-- discovering other feeds;
-- forming a valid RSS 2.0 feed on `devInspect` call;
+-   creating a new RSS feed with a top-level [SuiNS name](https://suins.io/);
+-   publishing to the feed;
+-   discovering other feeds;
+-   forming a valid RSS 2.0 feed on `devInspect` call;
 
 ## MVR
 
-This application is published on [MVR](https://moveregistry.com/)! See [@rss/rss](https://www.moveregistry.com/package/@rss/rss) for details on installation and usage.
+This application is published in [Move Registry](https://moveregistry.com/). See [@rss/rss](https://www.moveregistry.com/package/@rss/rss) for details on installation and usage.
 
 ## Credits
 
